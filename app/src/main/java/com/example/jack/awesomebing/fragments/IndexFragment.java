@@ -45,6 +45,7 @@ public class IndexFragment extends Fragment {
         return indexView;
     }
 
+    //加载第几页，每页20个
     void loadPage(int p){
         Call<PageInfo> call = service.getPage(p,20);
         call.enqueue(new Callback<PageInfo>() {
