@@ -27,20 +27,36 @@ public class IndexFragment extends Fragment {
     private BingService service;
     private RecyclerView rv;
     private BingRvAdapter bingRvAdapter;
+    private View indexView;
     ArrayList<DailyInfo> infos = new ArrayList<>();
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //retrofit用的
+        service = ((MainActivity) getActivity()).retrofit.create(BingService.class);
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //retrofit用的
-        service = ((MainActivity) getActivity()).retrofit.create(BingService.class);
-        //init view
-        View indexView = inflater.inflate(R.layout.fragment_index, container, false);
-        rv = (RecyclerView) indexView.findViewById(R.id.rv);
-        rv.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
-        bingRvAdapter = new BingRvAdapter(getActivity(),infos);
-        rv.setAdapter(bingRvAdapter);
-        loadPage(1);
+        //这个判断用来解决onCreateView多次调用的问题
+        if(indexView == null){
+            //如果indexView为null，说明是第一次调用，正常初始化就行
+            //init view
+            indexView = inflater.inflate(R.layout.fragment_index, container, false);
+            rv = (RecyclerView) indexView.findViewById(R.id.rv);
+            rv.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
+            bingRvAdapter = new BingRvAdapter(getActivity(),infos);
+            rv.setAdapter(bingRvAdapter);
+            loadPage(1);
+        }else {
+            //如果indexView不为null，说明不是第一次调用，直接返回indexView，方法体中的代码是解决（Java.lang.IllegalStateException: The specified child already has a parent）异常的
+            ViewGroup parent = (ViewGroup) indexView.getParent();
+            if(parent != null){
+                parent.removeView(indexView);
+            }
+        }
 
         return indexView;
     }
